@@ -1,4 +1,4 @@
-// import React from "react";
+import React from "react";
 import TranscriptSummarize from "../userComponents/TranscriptSummarize";
 import SpeechSummarize from "../userComponents/SpeechSummarize";
 import Table from "../userComponents/Table";

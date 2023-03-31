@@ -252,6 +252,9 @@ import React from 'react';
 
 export default function Demo() {
   const [file, setFile] = useState(null);
+  const [title,setTitle] = useState('');
+  const [date,setDate] = useState('');
+  const [meetingAttendees,setMeetingAttendees] = useState('');
   const [summary, setSummary] = useState('');
   const [actionItems,setActionItems] = useState('')
 
@@ -269,8 +272,10 @@ export default function Demo() {
         'http://localhost:5000/summarize',
         formData
       );
+      setTitle(response.data.title)
+      setDate(response.data.date)
+      setMeetingAttendees(response.data.meetingAttendees)
       setSummary(response.data.summary);
-      console.log(response.data.summary);
       setActionItems(response.data.actionItems);
 
     } catch (error) {
@@ -351,6 +356,42 @@ export default function Demo() {
                 Summarize
               </button>
             </form>
+            <div>
+            {title && (
+              <div className="mt-4">
+                {/* <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                  Summary
+                </h3> */}
+                <p className="text-sm text-gray-500 dark:text-gray-300">
+                  {title}
+                </p>
+              </div>
+            )}
+            </div>
+            <div>
+            {date && (
+              <div className="mt-4">
+                {/* <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                  Summary
+                </h3> */}
+                <p className="text-sm text-gray-500 dark:text-gray-300">
+                  {date}
+                </p>
+              </div>
+            )}
+            </div>
+            <div>
+            {meetingAttendees && (
+              <div className="mt-4">
+                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                  Summary
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-300">
+                  {meetingAttendees}
+                </p>
+              </div>
+            )}
+            </div>
             <div>
             {summary && (
               <div className="mt-4">

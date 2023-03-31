@@ -1,16 +1,15 @@
 import "../styles/globals.css";
 import Layout from "../layout/Layout";
-import { Auth } from "@supabase/auth-ui-react";
-// import supabaseClient from "../config/client";
+import { SessionProvider } from "next-auth/react";
 
-export default function App({ Component, pageProps }) {
+export default function App({ Component, pageProps, session }) {
   return (
     <>
-      {/* <Auth.UserContextProvider supabaseClient={supabaseClient}> */}
+      <SessionProvider session={session}>
         <Layout>
           <Component {...pageProps} />
         </Layout>
-      {/* </Auth.UserContextProvider> */}
+      </SessionProvider>
     </>
   );
 }
