@@ -1,14 +1,12 @@
-// 
 
+import React from "react";
 import { useState } from 'react';
 import axios from 'axios';
 import { Api } from '../userComponents/Api';
-import React from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
-
-function TxtFile(){
-    const [file, setFile] = useState(null);
+function VttFile() {
+  const [file, setFile] = useState(null);
   const [title,setTitle] = useState('');
   const [date,setDate] = useState('');
   const [meetingAttendees,setMeetingAttendees] = useState('');
@@ -19,81 +17,81 @@ function TxtFile(){
   const handleChange = (event) => {
     setFile(event.target.files[0]);
   };
-    function validateForm(){
-        const name = document.getElementById('name').value;
-        if(file ==""){
-          alert('Please select a file')
-          return false;
-        }
-        // const allowedExtensions=/(\.txt)$/i;
-        // if(!allowedExtensions.exec(file)){
-        //   alert('Invalid file type. Only .txt files are allowed.')
-        //   return false;
-        // }
-        // if(name === ''){
-        //   alert('Please enter a name for the transcript')
-        //   return false;
-        // }
-        return true;
-      }
+  function validateForm(){
+    const name = document.getElementById('name').value;
+    if(file ==""){
+      alert('Please select a file')
+      return false;
+    }
+    // const allowedExtensions=/(\.txt)$/i;
+    // if(!allowedExtensions.exec(file)){
+    //   alert('Invalid file type. Only .txt files are allowed.')
+    //   return false;
+    // }
+    // if(name === ''){
+    //   alert('Please enter a name for the transcript')
+    //   return false;
+    // }
+    return true;
+  }
+
+  const handleSubmitVtt = async (event) => {
+    event.preventDefault();
+    const isValid=validateForm();
+    if(!isValid){
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const response = await axios.post(
+        'http://localhost:5000/summarize_vtt',
+        formData
+      );
+      setTitle(response.data.title)
+      setDate(response.data.date)
+      setMeetingAttendees(response.data.meetingAttendees)
+      setSummary(response.data.summary);
+      setActionItems(response.data.actionItems);
+
+    } catch (error) {
+      // console.error(error);
+      // alert(' Oops! Something went wrong : '+error.message)
+      Swal.fire({
+   
+        background:'#000c19',
+        icon: 'error',
+        title: 'Oops...',
+        text: `Something went wrong: ${error.message}`,
+        confirmButtonColor: '#0066ff',
+        confirmButtonText: 'OK',
+      });
     
-    const handleSubmitTxt = async (event) => {
-        event.preventDefault();
-        const isValid=validateForm();
-        if(!isValid){
-          return;
-        }
-        const formData = new FormData();
-        formData.append('file', file);
-        try {
-          const response = await axios.post(
-            'http://localhost:5000/summarize_txt',
-            formData
-          );
-          setTitle(response.data.title)
-          setDate(response.data.date)
-          setMeetingAttendees(response.data.meetingAttendees)
-          setSummary(response.data.summary);
-          setActionItems(response.data.actionItems);
-    
-        } catch (error) {
-          // console.error(error);
-          // alert(' Oops! Something went wrong : '+error.message)
-          Swal.fire({
-       
-            background:'#000c19',
-            icon: 'error',
-            title: 'Oops...',
-            text: `Something went wrong: ${error.message}`,
-            confirmButtonColor: '#0066ff',
-            confirmButtonText: 'OK',
-          });
-        
-        }
-      };
-    return (
-      //   <section className="bg-gray-50 dark:bg-gray-900">
-      // <div className="flex flex-col justify-center mx-auto py-8 px-4 max-w-screen-xl sm:py-16 lg:px-6">
-      //   <div className="grid md:grid-cols-2 sm:grid-cols-1 gap-6">
-          <div>
+    }
+  };
+  return(
+    // <section className="bg-gray-50 dark:bg-gray-900">
+    // <div className="flex flex-col justify-center mx-auto py-8 px-4 max-w-screen-xl sm:py-16 lg:px-6">
+    //   <div className="grid md:grid-cols-2 sm:grid-cols-1 gap-6">
+    <div>
             <h2 className="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-              Summarize a Transcript
+              Summarize a Speech (Audio File)
             </h2>
-            <form onSubmit={handleSubmitTxt}>
+            <form onSubmit={handleSubmitVtt}>
               <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
                 <div className="sm:col-span-2">
                   <label
                     htmlFor="name"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
                   >
-                    Transcript Name
+                    Audio File Name
                   </label>
                   <input
                     type="text"
                     name="name"
                     id="name"
                     className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                    placeholder="Type transcript name"
+                    placeholder="Type audio file name"
                     required
                   />
                 </div>
@@ -123,19 +121,14 @@ function TxtFile(){
                         or drag and drop
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">
-                        TXT, DOC, DOCX or PDF (MAX. 10MB)
+                        MP3, WAV, or MP4 (MAX. 10MB)
                       </p>
                     </div>
-                    <input
-                      id="dropzone-file"
-                      type="file"
-                      className="hidden"
-                      onChange={handleChange}
-                    />
+                    <input id="dropzone-file" type="file" className="hidden"  onChange={handleChange} />
                   </label>
                 </div>
                 <p className="text-sm text-gray-500 dark:text-gray-300">
-                  TXT, DOC, DOCX or PDF (MAX. 10MB)
+                  MP3, WAV, or MP4 (MAX. 10MB)
                 </p>
               </div>
               <button
@@ -204,13 +197,11 @@ function TxtFile(){
                 </p>
               </div>
             )}
-            </div>
-            
           </div>
-          // </div>
-          // </div>
-          // </section>
-    );
-}
+        </div>
+    //   </div>
+    //   </div>
+    // </section>
+  );}
 
-export default TxtFile;
+export default VttFile
