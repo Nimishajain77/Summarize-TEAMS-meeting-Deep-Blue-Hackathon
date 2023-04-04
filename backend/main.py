@@ -94,6 +94,8 @@ def summarize_transcript(transcript):
             presence_penalty=0
         ).choices[0].text.strip()
 
+        # confidence = title.metadata.confidence
+
         # get action items from meting transcript
         action_response = []
 
