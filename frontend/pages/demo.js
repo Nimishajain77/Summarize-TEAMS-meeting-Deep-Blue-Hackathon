@@ -269,7 +269,7 @@ export default function Demo() {
     formData.append('file', file);
     try {
       const response = await axios.post(
-        'http://localhost:5000/summarize',
+        'http://localhost:5000/summarize_txt',
         formData
       );
       setTitle(response.data.title)
