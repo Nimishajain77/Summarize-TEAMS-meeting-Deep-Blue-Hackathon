@@ -1,4 +1,3 @@
-// 
 
 import { useState } from 'react';
 import axios from 'axios';
@@ -8,12 +7,13 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
 
 function TxtFile(){
-    const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null);
   const [title,setTitle] = useState('');
   const [date,setDate] = useState('');
   const [meetingAttendees,setMeetingAttendees] = useState('');
   const [summary, setSummary] = useState('');
   const [actionItems,setActionItems] = useState('')
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const handleChange = (event) => {
@@ -42,7 +42,7 @@ function TxtFile(){
         const isValid=validateForm();
         if(!isValid){
           return;
-        }
+        }setIsLoading(true);
         const formData = new FormData();
         formData.append('file', file);
         try {
@@ -70,6 +70,7 @@ function TxtFile(){
           });
         
         }
+        setIsLoading(false);
       };
     return (
       //   <section className="bg-gray-50 dark:bg-gray-900">
@@ -81,7 +82,7 @@ function TxtFile(){
             </h2>
             <form onSubmit={handleSubmitTxt}>
               <div className="grid gap-4 sm:grid-cols-2 sm:gap-6">
-                <div className="sm:col-span-2">
+               {/* <div className="sm:col-span-2">
                   <label
                     htmlFor="name"
                     className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
@@ -96,7 +97,7 @@ function TxtFile(){
                     placeholder="Type transcript name"
                     required
                   />
-                </div>
+                </div> */}
                 <div className="sm:col-span-2 flex items-center justify-center w-full">
                   <label
                     htmlFor="dropzone-file"
@@ -169,18 +170,7 @@ function TxtFile(){
               </div>
             )}
             </div>
-            <div>
-            {meetingAttendees && (
-              <div className="mt-4">
-                <h3 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
-                  Summary
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300">
-                  {meetingAttendees}
-                </p>
-              </div>
-            )}
-            </div>
+            
             <div>
             {summary && (
               <div className="mt-4">
@@ -200,7 +190,26 @@ function TxtFile(){
                   Action Items
                 </h3>
                 <p className="text-sm text-gray-500 dark:text-gray-300">
-                  {actionItems}
+                  {/* {actionItems.split('\n').map((item,index)=>(
+                    <li key={index}>{item}</li> */}
+                    {Object.values(actionItems).map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </p>
+              </div>
+            )}
+            </div>
+            <div>
+            {meetingAttendees && (
+              <div className="mt-4">
+                <h5 className="mb-2 text-lg font-medium text-gray-900 dark:text-white">
+                  Attendees of the meeting are
+                </h5>
+                <p className="text-sm text-gray-500 dark:text-gray-300">
+                  
+                  {Object.values(meetingAttendees).map((item, index) => (
+                    <li key={index}>{item}</li>
+                    ))}
                 </p>
               </div>
             )}
