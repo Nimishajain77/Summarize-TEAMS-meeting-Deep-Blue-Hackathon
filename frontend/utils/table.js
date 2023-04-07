@@ -18,6 +18,7 @@ const table = [
     date: "13/2/2022",
     type: "doc",
     summarize: "Transcript",
+   
     options: ["download", "edit", "delete"],
   },
   {

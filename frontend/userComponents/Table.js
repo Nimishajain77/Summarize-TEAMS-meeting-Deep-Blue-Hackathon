@@ -6,6 +6,9 @@ function Table() {
   const [showEditModal, setShowEditModal] = useState(false);
 
   return (
+  <section className="bg-gray-50 dark:bg-gray-900">
+     <div className="flex flex-col justify-center mx-auto py-8 px-4 max-w-screen-xl sm:py-16 lg:px-6">
+        {/* <div className="grid md:grid-cols-2 sm:grid-cols-1 gap-6"> */}
     <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
       <caption className="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
         Summarized Transcripts
@@ -87,12 +90,17 @@ function Table() {
             <td className="py-4 px-6">{row.type}</td>
             <td className="py-4 px-6">{row.summarize}</td>
             <td className="py-4 px-6">
+              
               <button
                 type="button"
                 className="mr-2 font-medium text-green-600 dark:text-green-500 hover:underline"
+                
               >
                 Download
               </button>
+            
+              
+              
               <button
                 type="button"
                 onClick={() => setShowEditModal(true)}
@@ -114,6 +122,11 @@ function Table() {
         ))}
       </tbody>
     </table>
+    </div>
+    </section>
+    
+    
+
   );
 }
 

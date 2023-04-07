@@ -8,11 +8,9 @@ import nltk
 from dotenv import load_dotenv
 import dateparser
 from os.path import splitext, exists
+from azure.translate import traslate_language_english
 import re
 from collections import Counter
-# import txt
-# import vtt
-# from STM import STM
 nltk.download("punkt")
 
 load_dotenv()
@@ -24,7 +22,6 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 
 def summarize_transcript(transcript):
-    action_response = []
 
     def break_up_file(tokens, chunk_size, overlap_size):
         if len(tokens) <= chunk_size:
@@ -45,75 +42,121 @@ def summarize_transcript(transcript):
         prompt_text = prompt_text.replace(" 's", "'s")
         return prompt_text
 
-    prompt_response = []
+    def split_text(text):
+        words = text.split()
+        word_limit = 1300
+        num_parts = len(words) // word_limit + 1
+        parts = []
+        for i in range(num_parts):
+            start_index = i * word_limit
+            end_index = (i + 1) * word_limit
+            parts.append(' '.join(words[start_index:end_index]))
+        return parts
 
-    chunks = break_up_file_to_chunks(transcript)
+    chunks = split_text(transcript)
+    summary_list = []
     for i, chunk in enumerate(chunks):
-        prompt_request = "Summarize this meeting transcript: " + convert_to_prompt_text(
-            chunks[i]
+        prompt = [
+            {"role": "system", "content": "Act as a meeting note taker, and summarize this meeting transcript. Highlight to-do lists and important keypoints from each speaker as highly precisely as possible. Make sure not to give any numbering to anything but add a new line after every keypoint. Additionally, add curly brackets around each speaker name."},
+            {"role": "user", "content": chunk},
+            {"role": "assistant", "content": "Keypoints:"}
+        ]
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=prompt,
+            max_tokens=300,
+            temperature=0.6,
+            n=1,
+            stop=None
         )
-        max_tokens = len(convert_to_prompt_text(chunks[i]).split()) // 2
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt_request,
-            temperature=0.5,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
+        summary = response.choices[0].message['content'].strip()
+        summary_list.append(summary)
 
-        prompt_response.append(response["choices"][0]["text"].strip())
+        # Join all summaries into one string
+        summary = '\n'.join(summary_list)
 
-        prompt_request = "Consoloidate these meeting summaries: " + \
-            str(prompt_response)
+        model_engine = "text-davinci-003"
+        temperature = 0  # Increase or decrease this to control the creativity of the generated title
 
-        response = openai.Completion.create(
-            model="text-davinci-003",
-            prompt=prompt_request,
-            temperature=0.5,
-            max_tokens=max_tokens,
-            top_p=1,
-            frequency_penalty=0,
-            presence_penalty=0,
-        )
-
-        meeting_summary = response["choices"][0]["text"].strip()
-
-        # model_engine = "text-davinci-003"
-        model_engine="davinci-instruct-beta-v3"  # Change this to the model you want to use
-        # Increase or decrease this to control the creativity of the generated title
-        temperature = 0
-        max_tokens = 20  # Increase or decrease this to control the length of the generated title
-
+        prompt_request = "Give a appropriate title for the meeting as accurate and less randomized as possible. If you feel the title accuracy is less than 70% print not sure in brackets. Also make sure the sentence is complete and does not end in conjunctions or prepositions"+summary
         title = openai.Completion.create(
             engine=model_engine,
-            prompt=meeting_summary,
+            prompt=prompt_request,
             temperature=temperature,
-            max_tokens=max_tokens,
             n=1,
-            stop=None,
             frequency_penalty=0,
             presence_penalty=0
         ).choices[0].text.strip()
 
-        # confidence = title.metadata.confidence
+        model_engine = "text-davinci-002"
 
-        # get action items from meting transcript
+        prompt_request = (f"Given a transcript, extract the date and time in the format \"date: DD/MM/YYYY, time: HH:MM AM/PM\""
+                          f" and return it as a string.\n\n"
+                          f"Transcript: {chunk}\n"
+                          f"Date: "
+                          f"Time: "
+                          )
+        # prompt= (f"Given a transcript, extract the date and time in the format "date: DD/MM/YYYY, time: HH:MM AM/PM" and return it as a string. \n\n{chunk}\n\nDate:\nTime:")
+        # response = openai.Completion.create(
+        #     engine=model_engine,
+        #     prompt=prompt_request,
+        #     max_tokens=1024,
+        #     n=1,
+        #     stop=None,
+        #     temperature=0.5,
+        # )
+        # date = response.choices[0].text.split("Date:")[0].split("Time:")[0].strip()
+        # time = response.choices[0].text.split("Time:")[0].strip()
+        # return date, time
+        model_engine = "text-davinci-002"
+
+        prompt_request = (f"Given a transcript, extract the date and time in the format \"date: DD/MM/YYYY, time: HH:MM AM/PM\""
+                          f" and return it as a string.\n\n"
+                          f"Transcript: {chunk}\n"
+                          f"Date: "
+                          f"Time: "
+                          )
+        # prompt= (f"Given a transcript, extract the date and time in the format "date: DD/MM/YYYY, time: HH:MM AM/PM" and return it as a string. \n\n{chunk}\n\nDate:\nTime:")
+        response = openai.Completion.create(
+            engine=model_engine,
+            prompt=prompt_request,
+            max_tokens=1024,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+        date = response.choices[0].text.split(
+            "Date:")[0].split("Time:")[0].strip()
+
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=f"Extract a list of people mentioned in the following transcript and make sure to print name of each attendee on a new line with numbering or bullet points\n{chunk}\n\nAttendees:",
+            max_tokens=100,
+            n=1,
+            stop=None,
+            temperature=0.5,
+        )
+
+        # Extract names from response
+        names = re.findall(r'(?i)\b[a-z]+\b', response.choices[0].text)
+        # Remove duplicates and return list of attendees
+
+        attendee_list = list(set(names))
+
+    #     # get action items from meting transcript
         action_response = []
 
-        chunks = break_up_file_to_chunks(transcript)
+        # chunks = break_up_file_to_chunks(transcript)
         for i, chunk in enumerate(chunks):
 
-            prompt_request = "Provide a list of action items with a due date from the provided meeting transcript text: " + \
-                convert_to_prompt_text(chunks[i])
+            prompt_request = "Act as a meeting note taker, and Provide a list of action items with a due date from the provided meeting transcript text . Highlight to-do lists and which person is supposed to complete which task as highly precisely as possible. Make sure to give any numbering to each keypoint print each keypoint on a new line." + \
+                chunk
             messages = [
                 {"role": "system", "content": "This is text summarization."}]
             messages.append({"role": "user", "content": prompt_request})
 
             response = openai.ChatCompletion.create(
                 model="gpt-3.5-turbo",
-    
                 messages=messages,
                 temperature=.5,
                 max_tokens=500,
@@ -145,12 +188,12 @@ def summarize_transcript(transcript):
             # string = "meeting_action_items = response[\"choices\"][0][\"message\"]['content'].strip()"
             points = meeting_action_items.split(".")
             print(points)
-            action_response = []
+        action_response = []
 
         chunks = break_up_file_to_chunks(transcript)
         for i, chunk in enumerate(chunks):
 
-            prompt_request = "Provide a list of action items with a due date from the provided meeting transcript text: " + \
+            prompt_request = "Provide a list of action items with a due date from the provided meeting transcript text in points with numbering and print each point on new line: " + \
                 convert_to_prompt_text(chunks[i])
             messages = [
                 {"role": "system", "content": "This is text summarization."}]
@@ -166,15 +209,23 @@ def summarize_transcript(transcript):
                 presence_penalty=0
             )
 
-        return jsonify(title=title, summary=meeting_summary, actionItems=points)
+            translate,lan=traslate_language_english(summary)
+            print(translate)
+            # print(lan)
+
+        results = jsonify(summary=summary, title=title, actionItems=points,
+                          date=date, meetingAttendees=attendee_list)
+        # Save the results in a text file named 'summary.txt'
+        # with open("results/summary.txt", "w") as f:
+        # f.write(title,date,summary,points)
+
+        return results
 
 
 def clean_webvtt(filepath):
     """Clean up the content of a subtitle file (vtt) to a string
-
     Args:
         filepath (str): path to vtt file
-
     Returns:
         str: clean content
     """
@@ -216,14 +267,12 @@ def clean_webvtt(filepath):
 # def vtt_to_clean_file(file_in: str, file_out=None, **kwargs) -> str:
 def vtt_to_clean_file(file_in, file_out=None, **kwargs):
     """Save clean content of a subtitle file to text file
-
     Args:
         file_in (str): path to vtt file
         file_out (None, optional): path to text file
         **kwargs (optional): arguments for other parameters
             - no_message (bool): do not show message of result.
                                 Default is False
-
     Returns:
         str: path to text file
     """

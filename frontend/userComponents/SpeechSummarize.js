@@ -64,7 +64,7 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.css';
 
 function TxtFile(){
-    const [file, setFile] = useState(null);
+  const [file, setFile] = useState(null);
   const [title,setTitle] = useState('');
   const [date,setDate] = useState('');
   const [meetingAttendees,setMeetingAttendees] = useState('');
@@ -103,7 +103,7 @@ function TxtFile(){
         formData.append('file', file);
         try {
           const response = await axios.post(
-            'http://localhost:5000/summarize_txt',
+            'http://localhost:5000/summarize_vtt',
             formData
           );
           setTitle(response.data.title)
