@@ -15,9 +15,9 @@ Presentation:
 https://www.canva.com/design/DAFo5qGoSeE/W4skLvLILwEoA6BPrJQT7g/edit?utm_content=DAFo5qGoSeE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
 Contributors:
-Nimisha Jain \t                         
-Sneha Kadambala\t
-Arya Kurup\t
-Priyanshu Singh\t
+Nimisha Jain                        
+Sneha Kadambala                          
+Arya Kurup                               
+Priyanshu Singh
 
 
