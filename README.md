@@ -10,8 +10,14 @@ Summarizing meetings is not similar to summarizing news articles or broadcast ne
 Since there is no conclusive solution out there, covering all other aspects of the problem description while summarizing the discussion is really important. We can delve deeply and produce an accurate result using Natural Language Processing and Machine Learning technologies. By finding a solution to this issue, we can automate summary and eliminate the necessity for individual note-taking.
 
             
+Presentation:
 
+https://www.canva.com/design/DAFo5qGoSeE/W4skLvLILwEoA6BPrJQT7g/edit?utm_content=DAFo5qGoSeE&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton
 
-
+Contributors:
+Nimisha Jain \t                         
+Sneha Kadambala\t
+Arya Kurup\t
+Priyanshu Singh\t
 
 
